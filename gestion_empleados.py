@@ -90,6 +90,8 @@ def obtener_empleado(id):
         return jsonify({"error": "Empleado no encontrado"}), 404
     return jsonify(serializar(empleado)), 200
 
+
+
 @app.route("/empleados/<id>", methods=["PUT"]) #actualizar un registro por ID
 @jwt_required()
 def actualizar_empleado(id):
@@ -106,6 +108,9 @@ def actualizar_empleado(id):
         
     if "fecha_ingreso" in datos and not validar_fecha(datos["fecha_ingreso"]):
         return jsonify({"error": "Formato de fecha inválido. Use DD/MM/YYYY"}), 400
+
+    datos.pop("fecha_creacion", None)
+    datos.pop("fecha_actualizacion", None)
 
     resultado = coleccion_empleados.update_one(
         {"_id": ObjectId(id)}, 
@@ -149,7 +154,7 @@ def login():
     if not datos or "email" not in datos or "password" not in datos:
         return jsonify({"error": "Email y password son requeridos"}), 400
     
-    #Validación de credenciales simple. Se debería verificar contra una base de datos y el password debe estar hasheado
+    #Validación de credenciales simple y en texto plano. En realidad se debería verificar contra una base de datos y el password debe estar hasheado.
     if datos["email"] == "admin@mail.com" and datos["password"] == "1234":
         token = create_access_token(identity=datos["email"])
         return jsonify({"token": token}), 200
